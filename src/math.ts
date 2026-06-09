@@ -23,7 +23,8 @@ export function transpose(matrix: number[][]): number[][] {
 
 export function softmax(matrix: number[][]): number[][] {
     return matrix.map(row => {
-        const exps = row.map(x => Math.exp(x));
+        const maxVal = Math.max(...row);
+        const exps = row.map(x => Math.exp(x - maxVal));
         const sumExps = exps.reduce((a, b) => a + b, 0);
         return exps.map(x => x / sumExps);
     });

@@ -1,12 +1,12 @@
 import { SimpleTokenizer } from './tokenizer';
 import { EmbeddingLayer, addPositionalEncoding, AttentionLayer, NeuralLayer, LMHead, backwardLinear, backwardInput } from './layers';
-import { computeLossAndGradients } from './math';
+import { computeLossAndGradients, softmax } from './math';
 import * as readline from 'readline';
 
 // ==========================================
 // CONFIGURATION
 // ==========================================
-const D_MODEL = 4;
+const D_MODEL = 16;
 const LEARNING_RATE = 0.05;
 const EPOCHS = 200;
 
@@ -128,9 +128,7 @@ function logTrainingProgress(
     initialDist: number
 ): void {
     if (epoch === 1 || epoch % 20 === 0) {
-        const maxLogit = Math.max(...logits);
-        const exps = logits.map(x => Math.exp(x - maxLogit));
-        const probs = exps.map(x => x / exps.reduce((a, b) => a + b, 0));
+        const probs = softmax([logits])[0]!;
         console.log(`Epoch ${epoch.toString().padStart(3, '0')} | Loss: ${loss.toFixed(4)} | Probability: ${(probs[targetIndex]! * 100).toFixed(1)}%`);
     }
 
@@ -162,10 +160,7 @@ function predict(
     const { logits } = forwardPass(testIndices, embeddings, attention, ffn, lmHead, dModel);
 
     // Convert logits to probabilities (Softmax)
-    const maxL = Math.max(...logits);
-    const exps = logits.map(x => Math.exp(x - maxL));
-    const sumE = exps.reduce((a, b) => a + b, 0);
-    const probs = exps.map(x => x / sumE);
+    const probs = softmax([logits])[0]!;
 
     // Print results
     probs.forEach((p, i) => {
@@ -197,7 +192,7 @@ function train(): TrainedModel {
 
     // Print initial state
     printEmbeddings(embeddings, tokenizer, "📋 Vectors BEFORE training");
-    const initialDist = calculateDistance(embeddings, tokenizer, "cat", "dog");
+    const initialDist = calculateDistance(embeddings, tokenizer, "cat", "meat");
     console.log(`Initial distance: ${initialDist.toFixed(6)}`);
 
     // Training loop

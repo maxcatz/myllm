@@ -7,7 +7,12 @@
   },
   "devDependencies": {
     "@types/node": "^25.9.2",
+    "get-tsconfig": "^4.14.0",
     "ts-node": "^10.9.2",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "dev": "ts-node src/main.ts"
   }
 }
