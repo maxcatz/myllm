@@ -2,64 +2,65 @@
 // TOY DATASET: Animals (Eat, Drink, Play)
 // ==========================================
 
-// 1. Define the exact vocabulary
-export const VOCAB = [
-  "<eos>",  // 0: End of Sequence (Critical for stopping generation)
-  "dog",    // 1
-  "cat",    // 2
-  "bear",   // 3
-  "eats",   // 4
-  "drinks", // 5
-  "plays",  // 6
-  "meat",   // 7
-  "fish",   // 8
-  "honey",  // 9
-  "water",  // 10
-  "milk",   // 11
-  "ball",    // 12
-  "human",  // 13
-  "vine",   // 14
-  "sleeps", //15
-  "well", //16
-
+// 1. Define the raw training sentences as strings
+const rawSentences = [
+  "dog eats meat",
+  "cat eats fish",
+  "bear eats honey",
+  "dog drinks water",
+  "cat drinks milk",
+  "bear drinks water",
+  "dog plays ball",
+  "cat plays ball",
+  "bear plays ball",
+  "human drinks vine",
+  "dog sleeps well"
 ];
 
+// Helper function to tokenize a sentence
+function tokenize(sentence: string): string[] {
+  return sentence.toLowerCase().split(/\s+/).filter(w => w);
+}
+
+// 2. Build vocabulary dynamically from rawSentences
+function buildVocabulary(sentences: string[]): string[] {
+  const uniqueWords = new Set<string>();
+  
+  // Collect all unique words from sentences
+  for (const sentence of sentences) {
+    const words = tokenize(sentence);
+    for (const word of words) {
+      uniqueWords.add(word);
+    }
+  }
+  
+  // Start with special tokens, then add sorted unique words
+  return ["<eos>", ...Array.from(uniqueWords).sort()];
+}
+
+// Build the vocabulary
+export const VOCAB = buildVocabulary(rawSentences);
 export const VOCAB_SIZE = VOCAB.length;
 
-// 2. Create fast lookup dictionaries
+// 3. Create fast lookup dictionaries
 export const wordToId: Record<string, number> = {};
 export const idToWord: Record<number, string> = {};
-
-
 
 VOCAB.forEach((word, index) => {
   wordToId[word] = index;
   idToWord[index] = word;
 });
 
-// 3. Define the raw training sentences
-const rawSentences = [
-  ["dog", "eats", "meat"],
-  ["cat", "eats", "fish"],
-  ["bear", "eats", "honey"],
-  ["dog", "drinks", "water"],
-  ["cat", "drinks", "milk"],
-  ["bear", "drinks", "water"],
-  ["dog", "plays", "ball"],
-  ["cat", "plays", "ball"],
-  ["bear", "plays", "ball"],
-  ["human", "drinks", "vine"],
-  ["dog", "sleeps", "well"]
-];
-
-
 // 4. Prepare the data for the Trainer
 // The Trainer needs Input (X) and Target (Y) arrays of indices.
 export const trainingData: { input: number[], target: number[] }[] = [];
 
 for (const sentence of rawSentences) {
+  // Tokenize the sentence into words
+  const words = tokenize(sentence);
+  
   // Convert words to their numeric IDs
-  const indices = sentence.map(word => wordToId[word]);
+  const indices = words.map(word => wordToId[word]);
 
   // Example for "dog eats meat" (1, 4, 7):
   // Input is the exact sentence: [1, 4, 7]
