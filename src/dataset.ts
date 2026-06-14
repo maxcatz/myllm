@@ -2,73 +2,83 @@
 // TOY DATASET: Animals (Eat, Drink, Play)
 // ==========================================
 
-// 1. Define the raw training sentences as strings
-const rawSentences = [
-  "dog eats meat",
-  "cat eats fish",
-  "bear eats honey",
-  "dog drinks water",
-  "cat drinks milk",
-  "bear drinks water",
-  "dog plays ball",
-  "cat plays ball",
-  "bear plays ball",
-  "human drinks vine",
-  "dog sleeps well"
-];
+export class TextDataset {
+  public vocab: string[] = [];
+  public wordToId: Record<string, number> = {};
+  public idToWord: Record<number, string> = {};
+  public trainingData: { input: number[], target: number[] }[] = [];
 
-// Helper function to tokenize a sentence
-function tokenize(sentence: string): string[] {
-  return sentence.toLowerCase().split(/\s+/).filter(w => w);
-}
+  constructor(private rawSentences: string[]) {
+    this.buildVocabulary();
+    this.prepareData();
+  }
 
-// 2. Build vocabulary dynamically from rawSentences
-function buildVocabulary(sentences: string[]): string[] {
-  const uniqueWords = new Set<string>();
-  
-  // Collect all unique words from sentences
-  for (const sentence of sentences) {
-    const words = tokenize(sentence);
-    for (const word of words) {
-      uniqueWords.add(word);
+  // Геттер для удобного получения размера словаря
+  public get vocabSize(): number {
+    return this.vocab.length;
+  }
+
+  // Приватный метод токенизации
+  private tokenize(sentence: string): string[] {
+    return sentence.toLowerCase().split(/\s+/).filter(w => w);
+  }
+
+  // 1. Построение словаря
+  private buildVocabulary(): void {
+    const uniqueWords = new Set<string>();
+
+    // Собираем уникальные слова
+    for (const sentence of this.rawSentences) {
+      const words = this.tokenize(sentence);
+      for (const word of words) {
+        uniqueWords.add(word);
+      }
+    }
+
+    // Инициализируем словарь с <eos> и сортируем остальные слова
+    this.vocab = ["<eos>", ...Array.from(uniqueWords).sort()];
+
+    // Заполняем словари быстрого доступа
+    this.vocab.forEach((word, index) => {
+      this.wordToId[word] = index;
+      this.idToWord[index] = word;
+    });
+  }
+
+  // 2. Подготовка данных для обучения
+  private prepareData(): void {
+    for (const sentence of this.rawSentences) {
+      const words = this.tokenize(sentence);
+      const indices = words.map(word => this.wordToId[word]);
+
+      // Input: точная копия индексов предложения
+      const input = [...indices];
+
+      // Target: сдвиг на 1 влево, в конце <eos>
+      const target = [...indices.slice(1), this.wordToId["<eos>"]];
+
+      this.trainingData.push({ input, target });
     }
   }
-  
-  // Start with special tokens, then add sorted unique words
-  return ["<eos>", ...Array.from(uniqueWords).sort()];
+
+  // 3. Публичный метод для кодирования пользовательского ввода (Inference)
+  public encode(sentence: string): number[] {
+    const words = this.tokenize(sentence);
+    return words.map(word => {
+      const id = this.wordToId[word];
+      return id !== undefined ? id : -1; // -1 для неизвестных слов
+    });
+  }
 }
 
-// Build the vocabulary
-export const VOCAB = buildVocabulary(rawSentences);
-export const VOCAB_SIZE = VOCAB.length;
+// ==========================================
+// ИСПОЛЬЗОВАНИЕ
+// ==========================================
 
-// 3. Create fast lookup dictionaries
-export const wordToId: Record<string, number> = {};
-export const idToWord: Record<number, string> = {};
 
-VOCAB.forEach((word, index) => {
-  wordToId[word] = index;
-  idToWord[index] = word;
-});
 
-// 4. Prepare the data for the Trainer
-// The Trainer needs Input (X) and Target (Y) arrays of indices.
-export const trainingData: { input: number[], target: number[] }[] = [];
-
-for (const sentence of rawSentences) {
-  // Tokenize the sentence into words
-  const words = tokenize(sentence);
-  
-  // Convert words to their numeric IDs
-  const indices = words.map(word => wordToId[word]);
-
-  // Example for "dog eats meat" (1, 4, 7):
-  // Input is the exact sentence: [1, 4, 7]
-  const input = [...indices];
-
-  // Target is shifted by 1 to the left, ending with <eos> (0):
-  // Target: [4, 7, 0] ("eats", "meat", "<eos>")
-  const target = [...indices.slice(1), wordToId["<eos>"]];
-
-  trainingData.push({ input, target });
-}
+// Теперь можно использовать:
+// dataset.vocabSize
+// dataset.trainingData
+// dataset.encode("bear eats honey")
+// dataset.idToWord[3]

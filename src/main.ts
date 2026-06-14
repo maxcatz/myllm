@@ -1,15 +1,31 @@
 import * as readline from 'readline';
 import { TransformerModel } from "./transformerModel";
 import { Trainer } from "./trainer";
-import { trainingData, VOCAB_SIZE, wordToId, idToWord } from "./dataset";
+import { TextDataset} from "./dataset";
 import {softmax} from "./math";
 
 // Initialize system
 const D_MODEL = 16;
 const LEARNING_RATE = 0.005;
 const EPOCHS = 5000;
+const rawSentences = [
+  "dog eats meat",
+  "cat eats fish",
+  "bear eats honey",
+  "dog drinks water",
+  "cat drinks milk",
+  "bear drinks water",
+  "dog plays ball",
+  "cat plays ball",
+  "bear plays ball",
+  "human drinks vine",
+  "dog sleeps well"
+];
 
-const model = new TransformerModel(VOCAB_SIZE, D_MODEL);
+// Создаем экземпляр датасета
+const dataset = new TextDataset(rawSentences);
+
+const model = new TransformerModel(dataset.vocabSize, D_MODEL);
 const trainer = new Trainer(model, LEARNING_RATE);
 
 async function runInteractiveMode() {
@@ -25,7 +41,7 @@ async function runInteractiveMode() {
   console.log("====================================\n");
 
   // Helper: translate words to IDs
-  const encode = (phrase: string) => phrase.split(' ').map(w => wordToId[w] ?? -1);
+  const encode = (phrase: string) => phrase.split(' ').map(w => dataset.wordToId[w] ?? -1);
 
   const ask = () => {
     rl.question('Phrase: ', (input) => {
@@ -44,11 +60,11 @@ async function runInteractiveMode() {
 
         const proc = softmax(logits);
         indices.forEach((inputIdx, step) => {
-          const inputWord = idToWord[inputIdx];
+          const inputWord = dataset.idToWord[inputIdx];
 
           // Получаем топ-5 для текущего шага
           const top5 = proc[step]
-            .map((prob, i) => ({ word: idToWord[i], prob }))
+            .map((prob, i) => ({ word: dataset.idToWord[i], prob }))
             .sort((a, b) => b.prob - a.prob)
             .slice(0, 5)
             .map(p => `${p.word} (${(p.prob * 100).toFixed(1)}%)`)
@@ -60,7 +76,7 @@ async function runInteractiveMode() {
         const lastTokenLogits = logits[logits.length - 1];
         const bestIdx = lastTokenLogits.indexOf(Math.max(...lastTokenLogits));
 
-        console.log(`Prediction: ${idToWord[bestIdx]}`);
+        console.log(`Prediction: ${dataset.idToWord[bestIdx]}`);
       }
       ask();
     });
@@ -72,7 +88,7 @@ async function runInteractiveMode() {
 // Execution flow
 async function main() {
   console.log("Starting training...");
-  trainer.train(trainingData, EPOCHS);
+  trainer.train(dataset.trainingData, EPOCHS);
   console.log("Training complete!\n");
 
   await runInteractiveMode();
