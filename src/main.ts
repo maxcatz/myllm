@@ -10,10 +10,10 @@ const D_MODEL = 16;
 const LEARNING_RATE = 0.05;
 const EPOCHS = 200;
 
-const TRAINING_DATA = "dog eats meat cat drinks milk cow eats grass dog drinks water";
+const TRAINING_DATA = "dog eats meat cat drinks milk cow eats grass dog drinks water cat eats fish";
 const DATASET = [
     { input: "dog eats", target: "meat" },
-    { input: "cat eats", target: "meat" },
+    { input: "cat eats", target: "fish" },
     { input: "dog drinks", target: "water" },
     { input: "cat drinks", target: "milk" },
     { input: "cow eats", target: "grass" },
