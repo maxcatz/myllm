@@ -83,3 +83,34 @@ export function seededRandom() {
     currentSeed = (currentSeed * 16807) % 2147483647;
     return (currentSeed - 1) / 2147483646;
 }
+
+
+export function addMatrices(...matrices: number[][][]): number[][] {
+    if (matrices.length === 0) return [];
+
+    const rows = matrices[0].length;
+    const cols = matrices[0][0].length;
+
+    // Создаем пустую матрицу-результат
+    const result = Array.from({ length: rows }, () => new Array(cols).fill(0));
+
+    // Проходим по всем переданным матрицам и плюсуем их значения
+    for (const matrix of matrices) {
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                result[i][j] += matrix[i][j];
+            }
+        }
+    }
+    return result;
+}
+
+export function dotProduct(vec1: number[], vec2: number[]): number {
+    let sum = 0;
+    const len = vec1.length;
+    for (let i = 0; i < len; i++) {
+        sum += vec1[i] * vec2[i];
+    }
+
+    return sum;
+}
