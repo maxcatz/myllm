@@ -5,7 +5,7 @@ export class Trainer {
 
   // Main training loop
   public train(data: { input: number[], target: number[] }[], epochs: number): void {
-    for (let epoch = 0; epoch < epochs; epoch++) {
+    for (let epoch = 0; epoch <= epochs; epoch++) {
       let totalLoss = 0;
 
       for (const { input, target } of data) {
@@ -30,7 +30,7 @@ export class Trainer {
         this.model.embeddings.updateWeights(this.learningRate);
       }
 
-      if (epoch % 10 === 0) {
+      if (epoch % 100 === 0) {
         console.log(`Epoch ${epoch}, Loss: ${totalLoss.toFixed(4)}`);
       }
     }

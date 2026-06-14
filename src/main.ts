@@ -7,7 +7,7 @@ import {softmax} from "./math";
 // Initialize system
 const D_MODEL = 16;
 const LEARNING_RATE = 0.005;
-const EPOCHS = 2000;
+const EPOCHS = 5000;
 
 const model = new TransformerModel(VOCAB_SIZE, D_MODEL);
 const trainer = new Trainer(model, LEARNING_RATE);
