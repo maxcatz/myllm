@@ -44,7 +44,8 @@ async function runInteractiveMode() {
   const encode = (phrase: string) => phrase.split(' ').map(w => dataset.wordToId[w] ?? -1);
 
   const ask = () => {
-    rl.question('Phrase: ', (input) => {
+    rl.question('Phrase: ', (rawInput) => {
+      const input = rawInput.trim();
       if (input.toLowerCase() === 'exit') {
         rl.close();
         return;
@@ -52,7 +53,7 @@ async function runInteractiveMode() {
 
       const indices = encode(input);
       if (indices.includes(-1)) {
-        console.log("⚠️ Unknown words. Try: dog, cat, bear, eats, drinks, plays, meat, fish, honey, water, milk, ball");
+        console.log("⚠️ Unknown words.");
       } else {
         // Set model to inference mode
         model.setTrainingMode(false);
