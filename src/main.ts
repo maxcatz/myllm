@@ -42,7 +42,20 @@ async function runInteractiveMode() {
         model.setTrainingMode(false);
         const logits = model.forward(indices);
 
-        const proc = softmax(logits)
+        const proc = softmax(logits);
+        indices.forEach((inputIdx, step) => {
+          const inputWord = idToWord[inputIdx];
+
+          // Получаем топ-5 для текущего шага
+          const top5 = proc[step]
+            .map((prob, i) => ({ word: idToWord[i], prob }))
+            .sort((a, b) => b.prob - a.prob)
+            .slice(0, 5)
+            .map(p => `${p.word} (${(p.prob * 100).toFixed(1)}%)`)
+            .join(', ');
+
+          console.log(`${inputWord} -> ${top5}`);
+        });
         // Get prediction for the last token
         const lastTokenLogits = logits[logits.length - 1];
         const bestIdx = lastTokenLogits.indexOf(Math.max(...lastTokenLogits));

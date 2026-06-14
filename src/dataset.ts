@@ -19,6 +19,8 @@ export const VOCAB = [
   "ball",    // 12
   "human",  // 13
   "vine",   // 14
+  "sleeps", //15
+  "well", //16
 
 ];
 
@@ -47,6 +49,7 @@ const rawSentences = [
   ["cat", "plays", "ball"],
   ["bear", "plays", "ball"],
   ["human", "drinks", "vine"],
+  ["dog", "sleeps", "well"]
 ];
 
 
