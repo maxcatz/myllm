@@ -7,7 +7,7 @@ import {softmax} from "./math";
 // Initialize system
 const D_MODEL = 16;
 const LEARNING_RATE = 0.005;
-const EPOCHS = 5000;
+const EPOCHS = 4000;
 const rawSentences = [
   "dog eats meat",
   "cat eats fish",
@@ -18,11 +18,11 @@ const rawSentences = [
   "dog plays ball",
   "cat plays ball",
   "bear plays ball",
-  "human drinks vine",
+  "human drinks wine",
   "dog sleeps well"
 ];
 
-// Создаем экземпляр датасета
+// Create dataset instance
 const dataset = new TextDataset(rawSentences);
 
 const model = new TransformerModel(dataset.vocabSize, D_MODEL);
@@ -63,7 +63,7 @@ async function runInteractiveMode() {
         indices.forEach((inputIdx, step) => {
           const inputWord = dataset.idToWord[inputIdx];
 
-          // Получаем топ-5 для текущего шага
+          // Get top-5 for current step
           const top5 = proc[step]
             .map((prob, i) => ({ word: dataset.idToWord[i], prob }))
             .sort((a, b) => b.prob - a.prob)

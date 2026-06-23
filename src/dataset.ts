@@ -13,21 +13,21 @@ export class TextDataset {
     this.prepareData();
   }
 
-  // Геттер для удобного получения размера словаря
+  // Getter for convenient access to vocabulary size
   public get vocabSize(): number {
     return this.vocab.length;
   }
 
-  // Приватный метод токенизации
+  // Private tokenization method
   private tokenize(sentence: string): string[] {
     return sentence.toLowerCase().split(/\s+/).filter(w => w);
   }
 
-  // 1. Построение словаря
+  // 1. Build vocabulary
   private buildVocabulary(): void {
     const uniqueWords = new Set<string>();
 
-    // Собираем уникальные слова
+    // Collect unique words
     for (const sentence of this.rawSentences) {
       const words = this.tokenize(sentence);
       for (const word of words) {
@@ -35,50 +35,38 @@ export class TextDataset {
       }
     }
 
-    // Инициализируем словарь с <eos> и сортируем остальные слова
+    // Initialize vocabulary with <eos> and sort remaining words
     this.vocab = ["<eos>", ...Array.from(uniqueWords).sort()];
 
-    // Заполняем словари быстрого доступа
+    // Fill quick access dictionaries
     this.vocab.forEach((word, index) => {
       this.wordToId[word] = index;
       this.idToWord[index] = word;
     });
   }
 
-  // 2. Подготовка данных для обучения
+  // 2. Prepare training data
   private prepareData(): void {
     for (const sentence of this.rawSentences) {
       const words = this.tokenize(sentence);
       const indices = words.map(word => this.wordToId[word]);
 
-      // Input: точная копия индексов предложения
+      // Input: exact copy of sentence indices
       const input = [...indices];
 
-      // Target: сдвиг на 1 влево, в конце <eos>
+      // Target: shift left by 1, with <eos> at the end
       const target = [...indices.slice(1), this.wordToId["<eos>"]];
 
       this.trainingData.push({ input, target });
     }
   }
 
-  // 3. Публичный метод для кодирования пользовательского ввода (Inference)
+  // 3. Public method for encoding user input (Inference)
   public encode(sentence: string): number[] {
     const words = this.tokenize(sentence);
     return words.map(word => {
       const id = this.wordToId[word];
-      return id !== undefined ? id : -1; // -1 для неизвестных слов
+      return id !== undefined ? id : -1; // -1 for unknown words
     });
   }
 }
-
-// ==========================================
-// ИСПОЛЬЗОВАНИЕ
-// ==========================================
-
-
-
-// Теперь можно использовать:
-// dataset.vocabSize
-// dataset.trainingData
-// dataset.encode("bear eats honey")
-// dataset.idToWord[3]

@@ -45,10 +45,10 @@ export function addMatrices(...matrices: number[][][]): number[][] {
     const rows = matrices[0].length;
     const cols = matrices[0][0].length;
 
-    // Создаем пустую матрицу-результат
+    // Create empty result matrix
     const result = Array.from({ length: rows }, () => new Array(cols).fill(0));
 
-    // Проходим по всем переданным матрицам и плюсуем их значения
+    // Iterate through all passed matrices and sum their values
     for (const matrix of matrices) {
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < cols; j++) {
